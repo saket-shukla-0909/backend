@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+
+
 // Define the User schema
 const userSchema = new mongoose.Schema(
   {
@@ -37,6 +39,11 @@ const userSchema = new mongoose.Schema(
     dob: {
       type: Date,
       default: null
+    },
+    role: {
+      type: Number,
+      enum: [1, 2, 3],
+      default: 3
     },
     token: {
       type: String,

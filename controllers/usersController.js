@@ -2,10 +2,17 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/usersModel');
 const validateRegistration = require('../utils/validation');
 const generateToken = require("../utils/generateTokens");
+userSchema.statics.ROLE = ROLE;
 
 
 
-// Controller function for registering a user
+
+const roleMap = {
+  admin:     1,
+  'sub admin': 2,
+  client:    3
+};
+
 const registerUser = async (req, res) => {
   // Validate request body
   const { error } = validateRegistration(req.body);
@@ -13,19 +20,32 @@ const registerUser = async (req, res) => {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  console.log(req.body, "----------------------")
-  const { username, email, password, full_name, phone_number, dob, profile_picture } = req.body;
+  const {
+    username,
+    email,
+    password,
+    full_name,
+    phone_number,
+    dob,
+    profile_picture,
+    role: roleString
+  } = req.body;
+
   try {
-    // Check if the username or email already exists
+    // Check for duplicate username or email
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
       return res.status(400).json({ message: 'Username or Email already exists' });
     }
 
-        // Hash the password before saving it
+    // Hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    // Create a new user instance
+
+    // Determine numeric role, default to Client (3)
+    const numericRole = roleMap[roleString?.toLowerCase()] || 3;
+
+    // Create user
     const newUser = new User({
       username,
       email,
@@ -33,15 +53,11 @@ const registerUser = async (req, res) => {
       full_name,
       phone_number,
       dob,
-      profile_picture
+      profile_picture,
+      role: numericRole
     });
 
-
-
-    // Save the new user to the database
     await newUser.save();
-
-    // Send success response
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
     console.error(err.message);
