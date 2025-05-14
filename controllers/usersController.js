@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/usersModel');
 const validateRegistration = require('../utils/validation');
 const generateToken = require("../utils/generateTokens");
-userSchema.statics.ROLE = ROLE;
 
 
 
