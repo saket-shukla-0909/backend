@@ -2,49 +2,35 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/usersModel');
 const validateRegistration = require('../utils/validation');
 const generateToken = require("../utils/generateTokens");
+const roleMap = require('../utils/roles'); 
 
-
-
-
-const roleMap = {
-  admin:     1,
-  'sub admin': 2,
-  client:    3
-};
 
 const registerUser = async (req, res) => {
-  // Validate request body
   const { error } = validateRegistration(req.body);
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  const {
-    username,
-    email,
-    password,
-    full_name,
-    phone_number,
-    dob,
-    profile_picture,
-    role: roleString
-  } = req.body;
+  let { username, email, password, full_name, phone_number, dob, profile_picture, role } = req.body;
 
   try {
-    // Check for duplicate username or email
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
       return res.status(400).json({ message: 'Username or Email already exists' });
     }
 
-    // Hash the password
+    // ✅ Convert role string ("admin", "sub admin", "client") to number (1, 2, 3)
+    if (typeof role === 'string') {
+      role = roleMap[role.toLowerCase()];
+      if (!role) {
+        return res.status(400).json({ message: 'Invalid role' });
+      }
+    }
+
+    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Determine numeric role, default to Client (3)
-    const numericRole = roleMap[roleString?.toLowerCase()] || 3;
-
-    // Create user
     const newUser = new User({
       username,
       email,
@@ -53,16 +39,18 @@ const registerUser = async (req, res) => {
       phone_number,
       dob,
       profile_picture,
-      role: numericRole
+      role
     });
 
     await newUser.save();
+
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
 
 
 const loginUser = async (req, res) => {

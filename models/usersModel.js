@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-
+const roleMap = require('../utils/roles'); 
 
 
 // Define the User schema
@@ -42,8 +42,9 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: Number,
-      enum: [1, 2, 3],
-      default: 3
+      enum: [1, 2, 3], // 1=admin, 2=sub admin, 3=client
+      default: roleMap.client,
+      required: true
     },
     token: {
       type: String,
