@@ -11,4 +11,5 @@ router.post('/logout', authenticate, userControllers.logoutUser);
 router.get('/getAllUser', authenticate, authorizeAdminOrSubAdmin, userControllers.getAllUser);
 router.delete("/delete/:id", authenticate, authorizeDelete, userControllers.deleteUser);
 
+
 module.exports = router;
