@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('../models/usersModel'); 
-const dotenv = require("dotenv").config();
+const User = require('../models/usersModel'); // assuming default export
+require('dotenv').config();
 
 const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -10,12 +10,11 @@ const authenticate = async (req, res, next) => {
   }
 
   const token = authHeader.split(' ')[1];
-  console.log(token, "this is token")
+
   try {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    console.log(decoded)
-    const user = await User.findById(decoded.id); // or User.findById() for Mongo
-    console.log(user, "this is user");
+    const user = await User.findById(decoded.id); // ✅ Mongoose method
+
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
@@ -24,7 +23,7 @@ const authenticate = async (req, res, next) => {
     next();
   } catch (err) {
     console.error('JWT error:', err);
-    res.status(401).json({ success: false, message: 'Invalid token' });
+    res.status(401).json({ success: false, message: 'Invalid or expired token' });
   }
 };
 
