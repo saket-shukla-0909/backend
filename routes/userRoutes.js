@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/register', userControllers.registerUser);
 router.post('/login', userControllers.loginUser);
 router.post('/logout', authenticate, userControllers.logoutUser);
-router.get('/getAllUser', userControllers.getAllUser);
+router.get('/getAllUser', authenticate, authorizeAdminOrSubAdmin, userControllers.getAllUser);
 
 
 module.exports = router;

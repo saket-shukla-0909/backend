@@ -12,7 +12,7 @@ const authenticate = async (req, res, next) => {
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, secret);
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const user = await User.findByPk(decoded.id); // or User.findById() for Mongo
     console.log(user, "this is user");
     if (!user) {
