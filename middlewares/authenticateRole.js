@@ -1,5 +1,7 @@
 // middleware/authorizeRole.js
-const roleMap = require('../config/roleMap');
+
+const roleMap = require("../utils/roles");
+
 
 const authorizeAdminOrSubAdmin = (req, res, next) => {
   const userRole = req.user.role;

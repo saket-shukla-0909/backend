@@ -128,7 +128,6 @@ const getAllUser = async (req, res) => {
   }
 };
 
-module.exports = { getAllUser };
 
 
-module.exports = { registerUser, loginUser, logoutUser } 
+module.exports = { registerUser, loginUser, logoutUser, getAllUser } 
