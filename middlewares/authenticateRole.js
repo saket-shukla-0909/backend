@@ -11,4 +11,28 @@ const authorizeAdminOrSubAdmin = (req, res, next) => {
   return res.status(403).json({ success: false, message: 'Access denied' });
 };
 
-module.exports = authorizeAdminOrSubAdmin;
+
+
+const authorizeDelete = (req, res, next) => {
+  const userIdToDelete = req.params.id;
+  const loggedInUser = req.user;
+
+  // Admin can delete anyone
+  if (loggedInUser.role === roleMap.admin) {
+    return next();
+  }
+
+  // Client can delete only themselves
+  if (
+    loggedInUser.role === roleMap.client &&
+    loggedInUser._id.toString() === userIdToDelete
+  ) {
+    return next();
+  }
+
+  // Sub admin or others - deny
+  return res.status(403).json({ message: 'Access denied' });
+};
+
+module.exports = {authorizeAdminOrSubAdmin, authorizeDelete};
+
