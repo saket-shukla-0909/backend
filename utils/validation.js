@@ -12,7 +12,8 @@ const validateRegistration = (data) => {
     role: Joi.alternatives().try(
       Joi.string().valid('admin', 'sub admin', 'client'),
       Joi.number().valid(1, 2, 3)
-    ).optional()
+    ).optional(),
+    status: Joi.number().valid(0, 1).optional() 
   });
 
   return schema.validate(data);

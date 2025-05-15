@@ -39,7 +39,7 @@ const registerUser = async (req, res) => {
       phone_number,
       dob,
       profile_picture,
-      role
+      role,
     });
 
     await newUser.save();
@@ -75,6 +75,7 @@ const loginUser = async (req, res) => {
     const token = generateToken(user._id);
     // Save the token to the user document
     user.token = token;
+    user.status = 1;
     await user.save(); 
 
     // response 
@@ -109,6 +110,7 @@ const logoutUser = async (req, res) => {
     user.token = null;  // Set token to null
 
     // Save the user document after clearing the token
+    user.status = 0;
     await user.save();
 
     res.status(200).json({ message: 'Logged out successfully' });
@@ -128,19 +130,23 @@ const getAllUser = async (req, res) => {
   }
 };
 
-
 const deleteUser = async (req, res) => {
   const userId = req.params.id;
 
   try {
-    await User.findByIdAndDelete(userId);
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     res.status(200).json({ message: "User deleted successfully" });
   } catch (err) {
+    console.error("Delete error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-module.exports = deleteUser;
 
 
-module.exports = { registerUser, loginUser, logoutUser, getAllUser } 
+module.exports = { registerUser, loginUser, logoutUser, getAllUser, deleteUser } 

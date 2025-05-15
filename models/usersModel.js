@@ -46,6 +46,11 @@ const userSchema = new mongoose.Schema(
       default: roleMap.client,
       required: true
     },
+    status: {
+      type: Number,
+      enum: [0, 1], // 0 = inactive, 1 = active
+      default: 0
+    },
     token: {
       type: String,
       default: null // Default value if token is not set yet
