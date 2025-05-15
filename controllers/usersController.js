@@ -10,7 +10,7 @@ const registerUser = async (req, res) => {
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
-
+  console.log(req.body,"this iskcbdsjb jb")
   let { username, email, password, full_name, phone_number, dob, profile_picture, role } = req.body;
 
   try {
@@ -50,8 +50,6 @@ const registerUser = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
-
-
 
 const loginUser = async (req, res) => {
   const { phone_number, password } = req.body;
@@ -119,5 +117,18 @@ const logoutUser = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+const getAllUser = async (req, res) => {
+  try {
+    const users = await User.findAll(); 
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+module.exports = { getAllUser };
+
 
 module.exports = { registerUser, loginUser, logoutUser } 
