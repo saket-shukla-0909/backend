@@ -1,12 +1,13 @@
 const express = require("express");
 const app = express();
 const dotenv = require("dotenv").config();
-const connectDB = require("./config/db")
-
+const connectDB = require("./config/db");
+const path = require("path");
 
 
 connectDB();
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/auth", require("./routes/userRoutes"));
 
 app.listen(process.env.SERVER_PORT, (error)=>{

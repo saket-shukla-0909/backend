@@ -122,13 +122,30 @@ const logoutUser = async (req, res) => {
 
 const getAllUser = async (req, res) => {
   try {
-    const users = await User.find(); 
-    res.status(200).json({ success: true, data: users });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const skip = (page - 1) * limit;
+    const total = await User.countDocuments();
+
+    const users = await User.find().skip(skip).limit(limit);
+
+    res.status(200).json({
+      success: true,
+      data: users,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
 
 const deleteUser = async (req, res) => {
   const userId = req.params.id;
@@ -148,5 +165,38 @@ const deleteUser = async (req, res) => {
 };
 
 
+// Upload profile picture controller
+const uploadProfilePicture = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const imagePath = req.file ? req.file.path : null;
 
-module.exports = { registerUser, loginUser, logoutUser, getAllUser, deleteUser } 
+    if (!imagePath) {
+      return res.status(400).json({ message: 'No image uploaded' });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profile_picture: imagePath },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({
+      message: 'Profile picture uploaded successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+
+
+
+
+module.exports = { registerUser, loginUser, logoutUser, getAllUser, deleteUser, uploadProfilePicture } 
