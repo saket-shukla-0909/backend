@@ -9,7 +9,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "https://frontend-k5pu.vercel.app",
+    origin: process.env.FRONTEND_URL || "https://frontend-k5pu-git-main-saket-shukla-0909s-projects.vercel.app",
     methods: ["GET", "POST"],
     credentials: true,
   },
