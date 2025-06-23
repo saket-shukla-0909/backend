@@ -11,7 +11,7 @@ console.log( process.env.FRONTEND_URL, "this is frontend url in index.js");
 app.use(express.json());
 app.use(
   cors({
-    origin: `${process.env.FRONTEND_URL}`|| "http://localhost:3000",
+    origin: `${process.env.FRONTEND_URL}`|| "https://frontend-k5pu-lpwxyapbc-saket-shukla-0909s-projects.vercel.app",
     credentials: true,
   })
 );
