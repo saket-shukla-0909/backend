@@ -11,8 +11,14 @@ router.post('/register', userControllers.registerUser);
 router.post('/login', userControllers.loginUser);
 router.post('/logout', authenticate, userControllers.logoutUser);
 router.get('/getAllUser', authenticate, authorizeAdminOrSubAdmin, userControllers.getAllUser);
+router.get('/getAllUsers', authenticate, userControllers.getAllUsers);
 router.delete('/delete/:id', authenticate, authorizeDelete, userControllers.deleteUser);
 router.post('/upload-profile/:id', upload.single('profile_picture'), authenticate, userControllers.uploadProfilePicture);
 
 
 module.exports = router;
+
+
+
+
+

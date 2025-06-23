@@ -6,11 +6,12 @@ const roleMap = require('../utils/roles');
 
 
 const registerUser = async (req, res) => {
+  console.log(req.body, "this is req body in register user")
   const { error } = validateRegistration(req.body);
+  console.log(req.body, "this is req body in register user")
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
-  console.log(req.body,"this iskcbdsjb jb")
   let { username, email, password, full_name, phone_number, dob, profile_picture, role } = req.body;
 
   try {
@@ -79,17 +80,7 @@ const loginUser = async (req, res) => {
     await user.save(); 
 
     // response 
-    res.status(200).json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      full_name: user.full_name,
-      phone_number: user.phone_number,
-      dob: user.dob,
-      profile_picture: user.profile_picture,
-      token: generateToken(user._id),
-      
-    });
+    res.status(201).json({user, message: 'User Logged In successfully' });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -98,9 +89,8 @@ const loginUser = async (req, res) => {
 
 const logoutUser = async (req, res) => {
   try {
-    const userId = req.user._id;  // Get user ID from the request (from auth middleware)
+    const userId = req.user._id;  
 
-    // Find the user and remove the token
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -120,6 +110,16 @@ const logoutUser = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    const LoggedInUser = req.user._id;
+    const users = await User.find({_id: {$ne: LoggedInUser}}).select('-password -token'); 
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+}
 const getAllUser = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -169,6 +169,7 @@ const deleteUser = async (req, res) => {
 const uploadProfilePicture = async (req, res) => {
   try {
     const userId = req.params.id;
+    console.log(userId, "this is user id in upload profile picture")
     const imagePath = req.file ? req.file.path : null;
 
     if (!imagePath) {
@@ -199,4 +200,4 @@ const uploadProfilePicture = async (req, res) => {
 
 
 
-module.exports = { registerUser, loginUser, logoutUser, getAllUser, deleteUser, uploadProfilePicture } 
+module.exports = { registerUser, loginUser, logoutUser, getAllUser, deleteUser, uploadProfilePicture, getAllUsers } 

@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: 6
+     
     },
     full_name: {
       type: String,
@@ -34,7 +34,8 @@ const userSchema = new mongoose.Schema(
     },
     phone_number: {
       type: String,
-      required: true
+      required: true,
+      unique: true
     },
     dob: {
       type: Date,
@@ -43,8 +44,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: Number,
       enum: [1, 2, 3], // 1=admin, 2=sub admin, 3=client
-      default: roleMap.client,
-      required: true
+      default: roleMap.client
     },
     status: {
       type: Number,
