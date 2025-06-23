@@ -7,11 +7,11 @@ const express = require("express");
 const { app, server } = require("./socketIo");
 
 connectDB();
-
+console.log( process.env.FRONTEND_URL, "this is frontend url in index.js"); 
 app.use(express.json());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: `${process.env.FRONTEND_URL}`|| "http://localhost:3000",
     credentials: true,
   })
 );
