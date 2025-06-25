@@ -1,105 +1,82 @@
-const { Server } = require('socket.io');
-const http = require('http');
-const express = require('express');
-const dotenv = require('dotenv');
+const { Server } = require("socket.io");
+const http = require("http");
+const express = require("express");
+const dotenv = require("dotenv");
 dotenv.config();
+const { Message } = require("../models/messageModel");
 
 const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "https://frontend-k5pu.vercel.app",
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
 
-const onlineUsers = new Map(); // userId => socket.id
+global.onlineUsers = new Map(); // userId => socketId
 
 io.on("connection", (socket) => {
-  console.log(`🔌 New client connected: ${socket.id}`);
+  console.log(`🔌 Socket connected: ${socket.id}`);
 
-  // Save user when connected
   socket.on("add-user", (userId) => {
-    onlineUsers.set(userId, socket.id);
-    console.log(`✅ User ${userId} added with socket ${socket.id}`);
+    global.onlineUsers.set(userId, socket.id);
   });
 
-  // Handle send message
-  socket.on("send-msg", (data) => {
-    const sendToSocket = onlineUsers.get(data.to);
-    const senderSocket = socket.id;
+  socket.on("send-msg", async ({ to, from, message }) => {
+    try {
+      const status = global.onlineUsers.has(to) ? "delivered" : "sent";
 
-    // Emit to recipient
-    if (sendToSocket) {
-      io.to(sendToSocket).emit("msg-receive", {
-        message: data.message,
-        from: data.from,
+      const newMessage = await Message.create({
+        senderId: from,
+        recieverId: to,
+        message,
+        status,
       });
 
-      // Notify sender that message is delivered
-      io.to(senderSocket).emit("msg-status-update", {
-        to: data.to,
-        status: "delivered",
-      });
-    } else {
-      // User is offline; consider saving to DB for future delivery
-      io.to(senderSocket).emit("msg-status-update", {
-        to: data.to,
-        status: "sent",
-      });
-    }
-  });
-
-  // Handle seen acknowledgment
-  socket.on("seen-msg", ({ from, to }) => {
-    const senderSocket = onlineUsers.get(from);
-    if (senderSocket) {
-      io.to(senderSocket).emit("msg-status-update", {
-        to,
-        status: "seen",
-      });
-    }
-  });
-
-  // Disconnect logic
-  socket.on("disconnect", () => {
-    console.log(`❌ Client disconnected: ${socket.id}`);
-    [...onlineUsers.entries()].forEach(([userId, sId]) => {
-      if (sId === socket.id) {
-        onlineUsers.delete(userId);
+      const receiverSocketId = global.onlineUsers.get(to);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("msg-receive", newMessage);
       }
-    });
+
+      const senderSocketId = global.onlineUsers.get(from);
+      if (senderSocketId) {
+        io.to(senderSocketId).emit("msg-sent", newMessage);
+      }
+    } catch (err) {
+      console.error("Send message error:", err);
+    }
+  });
+
+  socket.on("message-seen", async ({ messageId }) => {
+    try {
+      const updated = await Message.findByIdAndUpdate(
+        messageId,
+        { status: "seen" },
+        { new: true }
+      );
+
+      const senderSocketId = global.onlineUsers.get(updated.senderId.toString());
+      if (senderSocketId) {
+        io.to(senderSocketId).emit("message-seen-update", updated);
+      }
+    } catch (err) {
+      console.error("Seen update error:", err);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    for (const [userId, socketId] of global.onlineUsers.entries()) {
+      if (socketId === socket.id) {
+        global.onlineUsers.delete(userId);
+        console.log(`❌ User ${userId} disconnected`);
+        break;
+      }
+    }
   });
 });
 
-module.exports = { app, server, io };
-
-
-// const { Server } = require('socket.io');
-// const http = require('http');
-// const express = require('express');
-// const dotenv = require('dotenv');
-// dotenv.config();
-
-// const app = express();
-// const server = http.createServer(app);
-
-// const io = new Server(server, {
-//   cors: {
-//     origin: process.env.FRONTEND_URL || "https://frontend-k5pu.vercel.app",
-//     methods: ["GET", "POST"],
-//     credentials: true,
-//   },
-// });
-
-// io.on("connection", (socket) => {
-//   console.log(`🔌 New client connected: ${socket.id}`);
-
-//   socket.on("disconnect", () => {
-//     console.log(`❌ Client disconnected: ${socket.id}`);
-//   });
-// });
-
-// module.exports = { app, server, io }; // ✅ CommonJS export
+// ✅ Export both app and server (with io attached)
+module.exports = { app, server };
