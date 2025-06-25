@@ -14,6 +14,7 @@ router.get('/getAllUser', authenticate, authorizeAdminOrSubAdmin, userController
 router.get('/getAllUsers', authenticate, userControllers.getAllUsers);
 router.delete('/delete/:id', authenticate, authorizeDelete, userControllers.deleteUser);
 router.post('/upload-profile/:id', upload.single('profile_picture'), authenticate, userControllers.uploadProfilePicture);
+router.get("/search", authenticate, userControllers.searchUsersByNameOrPhone);
 
 
 module.exports = router;

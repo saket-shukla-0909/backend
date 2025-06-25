@@ -196,8 +196,29 @@ const uploadProfilePicture = async (req, res) => {
   }
 };
 
+const searchUsersByNameOrPhone = async (req, res) => {
+  try {
+    const search = req.query.search || "";
+    const regex = new RegExp(search, "i"); // case-insensitive search
+
+    const LoggedInUser = req.user._id;
+
+    const users = await User.find({
+      _id: { $ne: LoggedInUser }, // exclude current user
+      $or: [
+        { full_name: regex },
+        { phone_number: regex }
+      ]
+    }).select("-password -token");
+
+    res.status(200).json({ success: true, data: users });
+  } catch (err) {
+    console.error("Search error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 
 
 
-module.exports = { registerUser, loginUser, logoutUser, getAllUser, deleteUser, uploadProfilePicture, getAllUsers } 
+module.exports = { registerUser, loginUser, logoutUser, getAllUser, deleteUser, uploadProfilePicture, getAllUsers, searchUsersByNameOrPhone } 
