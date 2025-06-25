@@ -25,6 +25,23 @@ io.on("connection", (socket) => {
     global.onlineUsers.set(userId, socket.id);
   });
 
+  // ✅ Typing Event
+  socket.on("typing", ({ to, from }) => {
+    const receiverSocketId = global.onlineUsers.get(to);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("typing", { from });
+    }
+  });
+
+  // ✅ Stop Typing Event
+  socket.on("stop-typing", ({ to, from }) => {
+    const receiverSocketId = global.onlineUsers.get(to);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("stop-typing", { from });
+    }
+  });
+
+  // ✅ Send message
   socket.on("send-msg", async ({ to, from, message }) => {
     try {
       const status = global.onlineUsers.has(to) ? "delivered" : "sent";
@@ -50,6 +67,7 @@ io.on("connection", (socket) => {
     }
   });
 
+  // ✅ Message seen
   socket.on("message-seen", async ({ messageId }) => {
     try {
       const updated = await Message.findByIdAndUpdate(
@@ -67,6 +85,7 @@ io.on("connection", (socket) => {
     }
   });
 
+  // ✅ Disconnect handling
   socket.on("disconnect", () => {
     for (const [userId, socketId] of global.onlineUsers.entries()) {
       if (socketId === socket.id) {
@@ -78,5 +97,4 @@ io.on("connection", (socket) => {
   });
 });
 
-// ✅ Export both app and server (with io attached)
 module.exports = { app, server };
