@@ -66,6 +66,19 @@ const getMessage = async (req, res) => {
   }
 };
 
+const getAllMessages = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const messages = await Message.find({
+      $or: [{ senderId: userId }, { recieverId: userId }]
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json(messages);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to get messages' });
+  }
+};
+
 module.exports = {
-  sendMessage,  getMessage
+  sendMessage, getMessage, getAllMessages
 };
