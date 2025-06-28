@@ -3,7 +3,8 @@ const User = require('../models/usersModel');
 const validateRegistration = require('../utils/validation');
 const generateToken = require("../utils/generateTokens");
 const roleMap = require('../utils/roles'); 
-
+const fs = require('fs');
+const path = require('path');
 
 const registerUser = async (req, res) => {
   console.log(req.body, "this is req body in register user")
