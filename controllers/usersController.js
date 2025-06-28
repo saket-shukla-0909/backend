@@ -168,8 +168,7 @@ const deleteUser = async (req, res) => {
 // Upload profile picture controller
 const uploadProfilePicture = async (req, res) => {
   try {
-    const userId = req.params.id;
-    console.log(userId, "this is user id in upload profile picture")
+    const userId = req.user._id; // Secure: From token
     const imagePath = req.file ? req.file.path : null;
 
     if (!imagePath) {
@@ -195,6 +194,7 @@ const uploadProfilePicture = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
 
 const searchUsersByNameOrPhone = async (req, res) => {
   try {
