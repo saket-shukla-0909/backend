@@ -6,7 +6,6 @@ const upload = require('../middlewares/upload');
 const router = express.Router();
 
 
-// POST route for user registration
 router.post('/register', userControllers.registerUser);
 router.post('/login', userControllers.loginUser);
 router.post('/logout', authenticate, userControllers.logoutUser);
@@ -17,10 +16,4 @@ router.post('/upload-profile', authenticate, upload.single('profile_picture'), u
 router.get("/search", authenticate, userControllers.searchUsersByNameOrPhone);
 
 
-
 module.exports = router;
-
-
-
-
-

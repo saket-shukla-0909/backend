@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const User = require('../models/usersModel');
 
-const uploadProfilePicture = async (req, res) => {
+const upload = async (req, res) => {
   try {
     const userId = req.user._id; // Get user from token
     const imagePath = req.file ? req.file.path : null;
@@ -45,6 +45,9 @@ const uploadProfilePicture = async (req, res) => {
   }
 };
 
+
+module.exports = upload;
+
 // const multer = require('multer');
 // const path = require('path');
 // const fs = require('fs');
@@ -86,4 +89,4 @@ const uploadProfilePicture = async (req, res) => {
 //   limits: { fileSize: 2 * 1024 * 1024 } // max 2MB
 // });
 
-module.exports = upload;
+
