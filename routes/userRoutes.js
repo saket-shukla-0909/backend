@@ -13,7 +13,7 @@ router.post('/logout', authenticate, userControllers.logoutUser);
 router.get('/getAllUser', authenticate, authorizeAdminOrSubAdmin, userControllers.getAllUser);
 router.get('/getAllUsers', authenticate, userControllers.getAllUsers);
 router.delete('/delete/:id', authenticate, authorizeDelete, userControllers.deleteUser);
-router.post('/upload-profile', upload.single('profile_picture'), authenticate, userControllers.uploadProfilePicture);
+router.post('/upload-profile', authenticate, upload.single('profile_picture'), userControllers.uploadProfilePicture);
 router.get("/search", authenticate, userControllers.searchUsersByNameOrPhone);
 
 
