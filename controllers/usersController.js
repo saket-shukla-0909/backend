@@ -164,7 +164,6 @@ const deleteUser = async (req, res) => {
   }
 };
 
-
 // Upload profile picture controller
 const uploadProfilePicture = async (req, res) => {
   try {
@@ -175,20 +174,32 @@ const uploadProfilePicture = async (req, res) => {
       return res.status(400).json({ message: 'No image uploaded' });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { profile_picture: imagePath },
-      { new: true }
-    );
-
-    if (!updatedUser) {
+    const user = await User.findById(userId);
+    if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    const oldImagePath = user.profile_picture;
+
+    // Delete old image if exists
+    if (oldImagePath && oldImagePath.includes('uploads/profile_pictures')) {
+      const fullPath = path.join(__dirname, '..', oldImagePath);
+      if (fs.existsSync(fullPath)) {
+        fs.unlink(fullPath, (err) => {
+          if (err) console.error('Failed to delete old image:', err);
+          else console.log('Old profile picture deleted:', oldImagePath);
+        });
+      }
+    }
+
+    user.profile_picture = imagePath;
+    const updatedUser = await user.save();
+
     res.status(200).json({
       message: 'Profile picture uploaded successfully',
-      user: updatedUser
+      user: updatedUser,
     });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
