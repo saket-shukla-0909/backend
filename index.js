@@ -11,7 +11,7 @@ console.log( process.env.FRONTEND_URL, "this is frontend url in index.js");
 app.use(express.json());
 app.use(
   cors({
-    origin: `${process.env.FRONTEND_URL}`|| "https://frontend-k5pu-ri5hzh10d-saket-shukla-0909s-projects.vercel.app",
+    origin: `${process.env.FRONTEND_URL}`|| "https://frontend-28st.onrender.com",
     credentials: true,
   })
 );
