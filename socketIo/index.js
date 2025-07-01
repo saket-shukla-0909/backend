@@ -87,13 +87,14 @@ io.on("connection", (socket) => {
   });
 
   // 📞 Call initiated
-  socket.on("call-user", ({ to, signalData, from }) => {
+  socket.on("call-user", ({ to, signalData, from, isVideoCall }) => {
     const receiver = onlineUsers.get(to);
-    console.log(`📞 ${from} is calling ${to}`);
+    console.log(`📞 ${from} is calling ${to} - Video: ${isVideoCall}`);
     if (receiver) {
       io.to(receiver).emit("receive-call", {
         signal: signalData,
         from,
+        isVideoCall, // ✅ forward video/audio type
       });
     } else {
       console.log(`❌ User ${to} is offline or not connected`);
@@ -112,7 +113,7 @@ io.on("connection", (socket) => {
   // ❌ Call ended
   socket.on("end-call", ({ to }) => {
     const receiver = onlineUsers.get(to);
-    console.log(`❌ Call ended for ${to}`);
+    console.log(`📴 Call ended for ${to}`);
     if (receiver) {
       io.to(receiver).emit("call-ended");
     }
